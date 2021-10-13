@@ -3,7 +3,7 @@ from database import Database
 import const
 
 
-def get_params():
+def get_database_params():
     # Последовательность параметров: имя БД, имя пользователя, пароль, хост, порт
     try:
         db_name, user_name, password, host, port = sys.argv[1::]
@@ -16,7 +16,7 @@ def get_params():
 
     table_name = const.TABLE_NAME
 
-    db_data = {
+    db_params = {
         'database': db_name,
         'user': user_name,
         'password': password,
@@ -24,12 +24,12 @@ def get_params():
         'port': port,
         'table_name': table_name
     }
-    return db_data
+    return db_params
 
 
 if __name__ == '__main__':
-    db_data = get_params()
-    database = Database(**db_data)
+    db_params = get_database_params()
+    database = Database(**db_params)
     data = database.extract_table_data()
     print(data)
 

@@ -1,6 +1,7 @@
 import psycopg2
 
 from const import TABLE_FIELDS, TABLE_NAME
+from utils import tuple_to_dict
 
 
 class Database:
@@ -23,7 +24,7 @@ class Database:
         }
 
     def _connect(self):
-        # Подлючение к базе данных
+        """Подключение к базе данных"""
         try:
             connection_data = self._get_connection_data()
             self.__connection = psycopg2.connect(**connection_data)
@@ -34,19 +35,26 @@ class Database:
 
     @staticmethod
     def _form_query():
+        """Формирование запроса к БД"""
         return 'SELECT {fields} from public."{table_name}"'.format(
             fields=', '.join(TABLE_FIELDS),
             table_name=TABLE_NAME
         )
 
+    @staticmethod
+    def _clean_rows(rows):
+        for ind, row in enumerate(rows):
+            rows[ind] = tuple_to_dict(row, TABLE_FIELDS)
+        return rows
+
     def extract_table_data(self):
-        # Получаем данные таблицы
+        """Получение данных из таблицы"""
         if self.__connection is None or self.__connection.closed:
             self._connect()
         query = self._form_query()
         cursor = self.__connection.cursor()
         cursor.execute(query)
 
-        data = cursor.fetchall()
+        rows = self._clean_rows(cursor.fetchall())
         print('Data was extracted')
-        return data
+        return rows
