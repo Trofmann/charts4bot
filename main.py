@@ -1,5 +1,6 @@
 import sys
 from database import Database
+import const
 
 
 def get_params():
@@ -7,16 +8,16 @@ def get_params():
     try:
         db_name, user_name, password, host, port = sys.argv[1::]
     except Exception:
-        db_name = 'd4j4mnjl0qr8lh'
-        user_name = 'postgres'
-        password = 'postgres'
-        host = '127.0.0.1'
-        port = '5432'
+        db_name = const.DB_NAME
+        user_name = const.USER_NAME
+        password = const.PASSWORD
+        host = const.HOST
+        port = const.PORT
 
-    table_name = 'TCUserData'
+    table_name = const.TABLE_NAME
 
     db_data = {
-        'db_name': db_name,
+        'database': db_name,
         'user': user_name,
         'password': password,
         'host': host,
@@ -29,7 +30,8 @@ def get_params():
 if __name__ == '__main__':
     db_data = get_params()
     database = Database(**db_data)
-    print(1)
+    data = database.extract_table_data()
+    print(data)
 
     #
     # connection_cursor = connection.cursor()
