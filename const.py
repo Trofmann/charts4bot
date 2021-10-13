@@ -1,0 +1,6 @@
+DB_NAME = 'd4j4mnjl0qr8lh'
+USER_NAME = 'postgres'
+PASSWORD = 'postgres'
+HOST = '127.0.0.1'
+PORT = '5432'
+TABLE_NAME = 'TCUserData'
