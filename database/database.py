@@ -4,7 +4,7 @@ import psycopg2
 
 from const import TABLE_FIELDS, TABLE_NAME
 
-Data = namedtuple('Data', TABLE_FIELDS)
+DbData = namedtuple('Data', TABLE_FIELDS)
 
 
 class Database:
@@ -47,7 +47,7 @@ class Database:
     @staticmethod
     def _clean_rows(rows):
         for ind, row in enumerate(rows):
-            rows[ind] = Data(*row)
+            rows[ind] = DbData(*row)
         return rows
 
     def extract_table_data(self):

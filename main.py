@@ -1,4 +1,6 @@
 import sys
+
+from charts.classes import Data
 from database.database import Database
 import const
 
@@ -30,5 +32,6 @@ def get_database_params():
 if __name__ == '__main__':
     db_params = get_database_params()
     database = Database(**db_params)
-    data = database.extract_table_data()
-    print(data)
+    db_data = database.extract_table_data()
+    charts_data = Data(db_data)
+    print(2)
