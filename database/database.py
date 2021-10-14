@@ -1,7 +1,10 @@
+from collections import namedtuple
+
 import psycopg2
 
 from const import TABLE_FIELDS, TABLE_NAME
-from utils import tuple_to_dict
+
+Data = namedtuple('Data', TABLE_FIELDS)
 
 
 class Database:
@@ -44,7 +47,7 @@ class Database:
     @staticmethod
     def _clean_rows(rows):
         for ind, row in enumerate(rows):
-            rows[ind] = tuple_to_dict(row, TABLE_FIELDS)
+            rows[ind] = Data(*row)
         return rows
 
     def extract_table_data(self):

@@ -1,5 +1,5 @@
 import sys
-from database import Database
+from database.database import Database
 import const
 
 
@@ -32,8 +32,3 @@ if __name__ == '__main__':
     database = Database(**db_params)
     data = database.extract_table_data()
     print(data)
-
-    #
-    # connection_cursor = connection.cursor()
-    # connection.close()
-    # print(1)
