@@ -12,3 +12,12 @@ def tuple_to_dict(data_tuple: tuple, keys: list):
         for ind, data in enumerate(data_tuple):
             data_dict.update({keys[ind]: data})
         return data_dict
+
+def trim_datetime(_datetime, trim):
+    """
+    Очистка даты до определенного момента
+    :param _datetime: datetime.datetime
+    :param trim: str
+    :return: datetime
+    """
+    pass

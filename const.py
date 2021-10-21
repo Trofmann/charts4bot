@@ -14,12 +14,12 @@ TABLE_FIELDS = [
     'reg_time'
 ]
 
+# Типы извлекаемых полей
 INTEGER = 'integer'
 CHAR = 'field'
 JSON = 'json'
 DATETIME = 'timestamp'
 
-# Типы извлекаемых полей
 FIELDS_TYPES = {
     'id': INTEGER,
     'university_id': CHAR,
@@ -27,3 +27,19 @@ FIELDS_TYPES = {
     'reg_time': DATETIME,
 }
 
+# Моменты, до которых берем дату
+YEAR = 'year'
+MONTH = 'month'
+DAY = 'day'
+HOUR = 'hour'
+MINUTE = 'minute'
+SECOND = 'second'
+
+TRIMS = [
+    YEAR,
+    MONTH,
+    DAY,
+    HOUR,
+    MINUTE,
+    SECOND
+]

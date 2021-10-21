@@ -6,6 +6,7 @@ import const
 
 
 def get_database_params():
+    """Получение параметров для подключения к базе данных"""
     # Последовательность параметров: имя БД, имя пользователя, пароль, хост, порт
     try:
         db_name, user_name, password, host, port = sys.argv[1::]
@@ -34,4 +35,5 @@ if __name__ == '__main__':
     database = Database(**db_params)
     db_data = database.extract_table_data()
     charts_data = Data(db_data)
+    charts_data.filter_by_field_values('id', [1117867841, 701090458])
     print(2)
