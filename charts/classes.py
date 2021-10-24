@@ -57,6 +57,7 @@ class Data:
                     values.append(trimmed_date)
             values.sort()
         for row in self.__showing_rows:
+            # Необходимо для формирования кнопок на графике
             pass
 
         self.__times = values
@@ -69,6 +70,7 @@ class Data:
         :param values: значения
         :return: None
         """
+        # TODO: додумать фильтрацию по нескольким полям
         if values is None:
             self.__showing_rows = self.__rows
             return
@@ -80,11 +82,14 @@ class Data:
 
         # Отдельно фильтруем поля с типом datetime.datetime
         if FIELDS_TYPES.get(field_name, None) == DATETIME:
+            # TODO: добавить фильтрацию по datetime-полям
+            # Например, промежуток времени
             # Понадобится trim_datetime
             pass
 
         # Отдельно фильтруем поля с типом json
         if FIELDS_TYPES.get(field_name, None) == JSON:
+            # TODO: добавить фльтрацию по json-полям
             pass
 
         for row in self.__rows:
@@ -92,9 +97,14 @@ class Data:
                 self.__showing_rows.append(row)
 
     def get_chart(self):
+        # Вывод графиков
         self.get_users_amount(trim=MONTH)
         ax = pyplot
+        # Параметры окна
+        ax.figure(figsize=(14, 8))
         line1 = ax.plot(self.__times, self.__users_amounts)
+        # rax - фигура, в которой рисуется виджет
         rax = ax.axes([0.1, 0.4, 0.1, 0.15])
         check = widgets.CheckButtons(rax, ["asdasd", "asdasd"], )
+        check2 = widgets.RadioButtons(rax, ['dasdasda', 'asdasdasd'])
         ax.show()
