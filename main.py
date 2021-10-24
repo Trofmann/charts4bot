@@ -1,8 +1,8 @@
 import sys
 
+import const
 from charts.classes import Data
 from database.database import Database
-import const
 
 
 def get_database_params():
@@ -35,5 +35,4 @@ if __name__ == '__main__':
     database = Database(**db_params)
     db_data = database.extract_table_data()
     charts_data = Data(db_data)
-    charts_data.filter_by_field_values('id', [1117867841, 701090458])
-    print(2)
+    charts_data.get_chart()

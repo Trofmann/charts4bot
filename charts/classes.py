@@ -1,4 +1,7 @@
-from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME
+from matplotlib import pyplot, widgets
+
+from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, MONTH
+from utils import trim_datetime
 
 
 class Data:
@@ -11,24 +14,33 @@ class Data:
         self.__showing_rows = rows
         # Даты для оси x
         self.__times = []
+        # Количество пользователей по оси y
+        self.__users_amounts = []
 
     @property
     def is_empty(self):
         return bool(len(self.__rows))
 
-    def get_users_amount(self, field_name: str):
+    def get_users_amount(self, field_name=REG_TIME, trim=DAY):
         """Получение количества пользователей
 
         Аргументы:
         field_name - имя поля, данные которого извлекаем
         """
-        if field_name not in TABLE_FIELDS:
-            print("field_name not in extracted fields")
+        self.__users_amounts = []
+        if FIELDS_TYPES.get(field_name, None) != DATETIME:
+            print("Считать количество пользователей можно только для полей типа datetime")
             return 0
         # Уникальные значения поля
-        field_values = []
+        field_values = self.extract_field_unique_values(field_name, trim)
+        for value in field_values:
+            amount = 0
+            for row in self.__showing_rows:
+                row_field_value = trim_datetime(getattr(row, field_name, None), trim)
+                amount += int(value == row_field_value)
+            self.__users_amounts.append(amount)
 
-    def extract_field_unique_values(self, field_name: str, trim):
+    def extract_field_unique_values(self, field_name: str, trim=DAY):
         """
         Извлечение уникальных значений поля
         :param field_name: имя поля, данные которого извлекаем
@@ -36,12 +48,19 @@ class Data:
         :return:
         """
 
-        values = set()
+        values = []
         # Отдельно проверяем значения поля с типом datetime.datetime
         if FIELDS_TYPES.get(field_name, None) == DATETIME:
+            for row in self.__showing_rows:
+                trimmed_date = trim_datetime(getattr(row, field_name, None), trim)
+                if trimmed_date not in values:
+                    values.append(trimmed_date)
+            values.sort()
+        for row in self.__showing_rows:
             pass
-        for row in self.__rows:
-            pass
+
+        self.__times = values
+        return values
 
     def filter_by_field_values(self, field_name: str, values=None):
         """
@@ -59,12 +78,23 @@ class Data:
             print("Имя поля не извлекалось из БД")
             return
 
-        # Отдельно проверяем поля с типом datetime.datetime
+        # Отдельно фильтруем поля с типом datetime.datetime
         if FIELDS_TYPES.get(field_name, None) == DATETIME:
             # Понадобится trim_datetime
+            pass
+
+        # Отдельно фильтруем поля с типом json
+        if FIELDS_TYPES.get(field_name, None) == JSON:
             pass
 
         for row in self.__rows:
             if getattr(row, field_name) in values:
                 self.__showing_rows.append(row)
-        print(1)
+
+    def get_chart(self):
+        self.get_users_amount(trim=MONTH)
+        ax = pyplot
+        line1 = ax.plot(self.__times, self.__users_amounts)
+        rax = ax.axes([0.1, 0.4, 0.1, 0.15])
+        check = widgets.CheckButtons(rax, ["asdasd", "asdasd"], )
+        ax.show()

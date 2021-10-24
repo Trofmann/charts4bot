@@ -7,11 +7,16 @@ PORT = '5432'
 TABLE_NAME = 'TCUserData'
 
 # Поля, из которых извлекаем данные
+ID = 'id'
+UNIVERSITY_ID = 'university_id'
+UNIVERSITY_DATA = 'university_data'
+REG_TIME = 'reg_time'
+
 TABLE_FIELDS = [
-    'id',
-    'university_id',
-    'university_data',
-    'reg_time'
+    ID,
+    UNIVERSITY_ID,
+    UNIVERSITY_DATA,
+    REG_TIME
 ]
 
 # Типы извлекаемых полей
@@ -42,4 +47,13 @@ TRIMS = [
     HOUR,
     MINUTE,
     SECOND
+]
+
+# Для фильтрации данных
+COUNT = 'count'
+SHOW = 'show'
+
+REASONS = [
+    COUNT,
+    SHOW
 ]
