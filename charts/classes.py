@@ -5,6 +5,7 @@ from utils import trim_datetime
 
 
 class Data:
+    # TODO: переименовать в Chart
     """Класс для хранения и манипулирования данными для графиков"""
 
     def __init__(self, rows):
@@ -57,7 +58,7 @@ class Data:
                     values.append(trimmed_date)
             values.sort()
         for row in self.__showing_rows:
-            # Необходимо для формирования кнопок на графике
+            # Необходимо для формирования баттонов на графике
             pass
 
         self.__times = values
@@ -83,6 +84,7 @@ class Data:
         # Отдельно фильтруем поля с типом datetime.datetime
         if FIELDS_TYPES.get(field_name, None) == DATETIME:
             # TODO: добавить фильтрацию по datetime-полям
+            # Не к спеху
             # Например, промежуток времени
             # Понадобится trim_datetime
             pass
@@ -97,6 +99,7 @@ class Data:
                 self.__showing_rows.append(row)
 
     def get_chart(self):
+        # TODO: переименовать в show
         # Вывод графиков
         self.get_users_amount(trim=MONTH)
         ax = pyplot
@@ -108,3 +111,9 @@ class Data:
         check = widgets.CheckButtons(rax, ["asdasd", "asdasd"], )
         check2 = widgets.RadioButtons(rax, ['dasdasda', 'asdasdasd'])
         ax.show()
+
+# TODO: создать class Filter - набор радиобаттонов и чекбаттонов, параметр иницилизации - ax
+# В нём - обработка нажатия кнопки submit
+
+# TODO: trim извлекать с помощью радиобаттонов
+# TODO: подумать над динамическим фильтром
