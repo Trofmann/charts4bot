@@ -1,0 +1,3 @@
+# В inches
+WINDOW_WIDTH = 14
+WINDOW_HEIGHT = 8
