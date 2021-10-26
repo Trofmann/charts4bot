@@ -1,5 +1,6 @@
 from matplotlib import pyplot, widgets
 
+from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT
 from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, MONTH
 from utils import trim_datetime
 
@@ -100,13 +101,15 @@ class Data:
 
     def get_chart(self):
         # TODO: переименовать в show
+        # TODO: числовые параметры фигур задать константами или вычислять автоматически
         # Вывод графиков
         self.get_users_amount(trim=MONTH)
         ax = pyplot
         # Параметры окна
-        ax.figure(figsize=(14, 8))
+        ax.figure(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT))
         line1 = ax.plot(self.__times, self.__users_amounts)
         # rax - фигура, в которой рисуется виджет
+        # TODO: в фильтре генерировать автоматически
         rax = ax.axes([0.1, 0.4, 0.1, 0.15])
         check = widgets.CheckButtons(rax, ["asdasd", "asdasd"], )
         check2 = widgets.RadioButtons(rax, ['dasdasda', 'asdasdasd'])
