@@ -6,7 +6,7 @@ import psycopg2
 from const import TABLE_FIELDS
 from settings import local, TABLE_NAME, DB_URL
 
-DbData = namedtuple('Chart', TABLE_FIELDS)
+DbData = namedtuple('Data', TABLE_FIELDS)
 
 
 class Database:

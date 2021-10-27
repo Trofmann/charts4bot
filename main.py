@@ -11,7 +11,7 @@ def get_database_params():
     try:
         db_name, user_name, password, host, port = sys.argv[1::]
     except Exception:
-        db_name = settings.DB_NAME
+        db_name = settings.TEST_DB_NAME if settings.test else settings.DB_NAME
         user_name = settings.USER_NAME
         password = settings.PASSWORD
         host = settings.HOST
@@ -19,7 +19,7 @@ def get_database_params():
 
     table_name = settings.TABLE_NAME
 
-    db_params = {
+    params = {
         'database': db_name,
         'user': user_name,
         'password': password,
@@ -27,7 +27,7 @@ def get_database_params():
         'port': port,
         'table_name': table_name
     }
-    return db_params
+    return params
 
 
 if __name__ == '__main__':

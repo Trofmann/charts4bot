@@ -9,3 +9,4 @@ PORT = '5432'
 TABLE_NAME = 'TCUserData'
 
 local = True
+test = False
