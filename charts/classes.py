@@ -1,13 +1,12 @@
 from matplotlib import pyplot, widgets
 
 from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT
-from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, MONTH
+from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, MONTH, MINUTE
 from utils import trim_datetime
 
 
-class Data:
-    # TODO: переименовать в Chart
-    """Класс для хранения и манипулирования данными для графиков"""
+class Chart:
+    """Класс для вывда графика"""
 
     def __init__(self, rows):
         # Данные, полученные из БД
@@ -18,6 +17,10 @@ class Data:
         self.__times = []
         # Количество пользователей по оси y
         self.__users_amounts = []
+        # График
+        self.__ax = pyplot
+        # Параметры окна
+        self.__ax.figure(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT))
 
     @property
     def is_empty(self):
@@ -47,7 +50,7 @@ class Data:
         Извлечение уникальных значений поля
         :param field_name: имя поля, данные которого извлекаем
         :param trim: in const.TRIMS
-        :return:
+        :return: values
         """
 
         values = []
@@ -99,24 +102,23 @@ class Data:
             if getattr(row, field_name) in values:
                 self.__showing_rows.append(row)
 
-    def get_chart(self):
+    def show_chart(self):
         # TODO: переименовать в show
         # TODO: числовые параметры фигур задать константами или вычислять автоматически
         # Вывод графиков
-        self.get_users_amount(trim=MONTH)
-        ax = pyplot
-        # Параметры окна
-        ax.figure(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT))
-        line1 = ax.plot(self.__times, self.__users_amounts)
+        self.get_users_amount(trim=DAY)
+        line1 = self.__ax.plot(self.__times, self.__users_amounts)
         # rax - фигура, в которой рисуется виджет
         # TODO: в фильтре генерировать автоматически
-        rax = ax.axes([0.1, 0.4, 0.1, 0.15])
-        check = widgets.CheckButtons(rax, ["asdasd", "asdasd"], )
-        check2 = widgets.RadioButtons(rax, ['dasdasda', 'asdasdasd'])
-        ax.show()
+        # rax = self.__ax.axes([0.1, 0.4, 0.1, 0.15])
+        # check = widgets.CheckButtons(rax, ["asdasd", "asdasd"], )
+        # check2 = widgets.RadioButtons(rax, ['dasdasda', 'asdasdasd'])
+        self.__ax.show()
 
 # TODO: создать class Filter - набор радиобаттонов и чекбаттонов, параметр иницилизации - ax
 # В нём - обработка нажатия кнопки submit
 
 # TODO: trim извлекать с помощью радиобаттонов
 # TODO: подумать над динамическим фильтром
+# TODO: получать минимальное значение времени, максимальное значение времени
+# TODO: выделить файл настроек

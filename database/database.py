@@ -1,10 +1,11 @@
+import os
 from collections import namedtuple
 
 import psycopg2
 
-from const import TABLE_FIELDS, TABLE_NAME
+from const import TABLE_FIELDS, TABLE_NAME, DB_URL
 
-DbData = namedtuple('Data', TABLE_FIELDS)
+DbData = namedtuple('Chart', TABLE_FIELDS)
 
 
 class Database:
@@ -26,11 +27,14 @@ class Database:
             'port': self.__port,
         }
 
-    def _connect(self):
+    def _connect(self, local):
         """Подключение к базе данных"""
         try:
-            connection_data = self._get_connection_data()
-            self.__connection = psycopg2.connect(**connection_data)
+            if local:
+                connection_data = self._get_connection_data()
+                self.__connection = psycopg2.connect(**connection_data)
+            else:
+                self.__connection = psycopg2.connect(DB_URL)
             print('Database base was opened successfully')
         except Exception:
             print('Проверь правильность данных')
@@ -50,14 +54,14 @@ class Database:
             rows[ind] = DbData(*row)
         return rows
 
-    def extract_table_data(self):
+    def extract_table_data(self, local=True):
         """Получение данных из таблицы"""
         if self.__connection is None or self.__connection.closed:
-            self._connect()
+            self._connect(local)
         query = self._form_query()
         cursor = self.__connection.cursor()
         cursor.execute(query)
 
         rows = self._clean_rows(cursor.fetchall())
-        print('Data was extracted')
+        print('Chart was extracted')
         return rows
