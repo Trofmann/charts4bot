@@ -3,7 +3,8 @@ from collections import namedtuple
 
 import psycopg2
 
-from const import TABLE_FIELDS, TABLE_NAME, DB_URL
+from const import TABLE_FIELDS
+from settings import local, TABLE_NAME, DB_URL
 
 DbData = namedtuple('Chart', TABLE_FIELDS)
 
@@ -27,7 +28,7 @@ class Database:
             'port': self.__port,
         }
 
-    def _connect(self, local):
+    def _connect(self):
         """Подключение к базе данных"""
         try:
             if local:
@@ -54,10 +55,10 @@ class Database:
             rows[ind] = DbData(*row)
         return rows
 
-    def extract_table_data(self, local=True):
+    def extract_table_data(self):
         """Получение данных из таблицы"""
         if self.__connection is None or self.__connection.closed:
-            self._connect(local)
+            self._connect()
         query = self._form_query()
         cursor = self.__connection.cursor()
         cursor.execute(query)

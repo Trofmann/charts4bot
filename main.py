@@ -1,6 +1,6 @@
 import sys
 
-import const
+import settings
 from charts.classes import Chart
 from database.database import Database
 
@@ -11,13 +11,13 @@ def get_database_params():
     try:
         db_name, user_name, password, host, port = sys.argv[1::]
     except Exception:
-        db_name = const.DB_NAME
-        user_name = const.USER_NAME
-        password = const.PASSWORD
-        host = const.HOST
-        port = const.PORT
+        db_name = settings.DB_NAME
+        user_name = settings.USER_NAME
+        password = settings.PASSWORD
+        host = settings.HOST
+        port = settings.PORT
 
-    table_name = const.TABLE_NAME
+    table_name = settings.TABLE_NAME
 
     db_params = {
         'database': db_name,
