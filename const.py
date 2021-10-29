@@ -1,4 +1,7 @@
 # Поля, из которых извлекаем данные
+
+from dateutil.relativedelta import relativedelta
+
 ID = 'id'
 UNIVERSITY_ID = 'university_id'
 UNIVERSITY_DATA = 'university_data'
@@ -49,3 +52,12 @@ REASONS = [
     COUNT,
     SHOW
 ]
+
+TIMEDELTAS = {
+    YEAR: relativedelta(years=1),
+    MONTH: relativedelta(months=1),
+    DAY: relativedelta(days=1),
+    HOUR: relativedelta(hours=1),
+    MINUTE: relativedelta(minutes=1),
+    SECOND: relativedelta(minutes=1)
+}

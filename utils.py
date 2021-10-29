@@ -41,3 +41,23 @@ def trim_datetime(_datetime, trim=DAY):
             clean_datetime = clean_datetime.replace(hour=_datetime.hour, minute=_datetime.minute,
                                                     second=_datetime.second)
     return clean_datetime
+
+
+def fill_by_sequential_values(start_val, stop_val, step, _datetime=False):
+    """
+    Последовательные значения
+    :param start_val: начальное значение
+    :param stop_val: конечное значение
+    :param step: шаг
+    :param _datetime: флаг
+    :return: list
+    """
+    values = []
+    if _datetime:
+        current_datetime = start_val
+        while current_datetime <= stop_val:
+            values.append(current_datetime)
+            current_datetime = current_datetime + step
+    else:
+        values = [i for i in range(start_val, stop_val + step, step)]
+    return values
