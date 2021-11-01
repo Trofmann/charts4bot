@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from const import DAY, YEAR, MONTH, HOUR, MINUTE, SECOND
+from const import DAY, YEAR, MONTH, HOUR, MINUTE, SECOND, FIELDS_TYPES
 
 
 def tuple_to_dict(data_tuple: tuple, keys: list):
@@ -61,3 +61,8 @@ def fill_by_sequential_values(start_val, stop_val, step, _datetime=False):
     else:
         values = [i for i in range(start_val, stop_val + step, step)]
     return values
+
+
+def is_field_type(field, field_type):
+    """Проверка на совпадение типа поля с переданном типом"""
+    return FIELDS_TYPES.get(field, None) == field_type

@@ -1,12 +1,13 @@
 from matplotlib import pyplot
 
 from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT
+from charts.filters import filter_by_datetime_field, filter_by_json_field, filter_by_field
 from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS
-from utils import trim_datetime, fill_by_sequential_values
+from utils import trim_datetime, fill_by_sequential_values, is_field_type
 
 
 class Chart:
-    """Класс для вывда графика"""
+    """Класс для вывода графика"""
 
     def __init__(self, rows):
         # Данные, полученные из БД
@@ -70,41 +71,34 @@ class Chart:
 
         return values
 
-    def filter_by_field_values(self, field_name: str, values=None):
+    def filter_by_fields_values(self, values=None, **kwargs):
         """
         Фильтрация данных по значениям поля
-        :param field_name: имя поля
         :param values: значения
-        :return: None
+        :param kwargs: словарь вида {имя_поля : [значения]}
+        :return: filtered_values: список отфильтрованных значений
         """
-        # TODO: додумать фильтрацию по нескольким полям
-        if values is None:
-            self.__showing_rows = self.__rows
-            return
 
-        self.__showing_rows = []
-        if field_name not in TABLE_FIELDS:
-            print("Имя поля не извлекалось из БД")
-            return
+        filtered_values = self.__rows
+        for field, values in kwargs.items():
+            if field not in TABLE_FIELDS:
+                print(f'Поле {field} не извлекалось из БД')
+                continue
+            if not isinstance(values, list):
+                values = [values]
+                print(f'Для поля {field} передан не список значений: ({values})')
 
-        # Отдельно фильтруем поля с типом datetime.datetime
-        if FIELDS_TYPES.get(field_name, None) == DATETIME:
-            # TODO: добавить фильтрацию по datetime-полям
-            # Не к спеху
-            # Например, промежуток времени
-            # Понадобится trim_datetime
-            pass
+            if is_field_type(field, DATETIME):
+                filtered_values = filter_by_datetime_field(filtered_values, field, values)
+            elif is_field_type(field, JSON):
+                filtered_values = filter_by_json_field(filtered_values, field, values)
+            else:
+                filtered_values = filter_by_field(filtered_values, field, values)
 
-        # Отдельно фильтруем поля с типом json
-        if FIELDS_TYPES.get(field_name, None) == JSON:
-            # TODO: добавить фльтрацию по json-полям
-            pass
-
-        for row in self.__rows:
-            if getattr(row, field_name) in values:
-                self.__showing_rows.append(row)
+        return filtered_values
 
     def prepare_data(self, trim=DAY):
+        """Подготовка данных к выводу"""
         times = self.extract_field_unique_values(field_name=REG_TIME, trim=trim)
         _timedelta = TIMEDELTAS.get(trim, None)
         self.__times = fill_by_sequential_values(times[0], times[-1], _timedelta, _datetime=True)
@@ -113,7 +107,6 @@ class Chart:
         self.__users_amounts = users_amount
 
     def show_chart(self):
-        # TODO: переименовать в show
         # TODO: числовые параметры фигур задать константами или вычислять автоматически
         # Вывод графиков
         self.prepare_data(trim=DAY)
