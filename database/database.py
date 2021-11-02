@@ -64,5 +64,5 @@ class Database:
         cursor.execute(query)
 
         rows = self._clean_rows(cursor.fetchall())
-        print('Chart was extracted')
+        print('Data was extracted')
         return rows

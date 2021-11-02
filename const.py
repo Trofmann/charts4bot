@@ -6,6 +6,7 @@ ID = 'id'
 UNIVERSITY_ID = 'university_id'
 UNIVERSITY_DATA = 'university_data'
 REG_TIME = 'reg_time'
+FACULTY = 'faculty'
 
 TABLE_FIELDS = [
     ID,
@@ -44,15 +45,6 @@ TRIMS = [
     SECOND
 ]
 
-# Для фильтрации данных
-COUNT = 'count'
-SHOW = 'show'
-
-REASONS = [
-    COUNT,
-    SHOW
-]
-
 TIMEDELTAS = {
     YEAR: relativedelta(years=1),
     MONTH: relativedelta(months=1),
@@ -61,3 +53,15 @@ TIMEDELTAS = {
     MINUTE: relativedelta(minutes=1),
     SECOND: relativedelta(minutes=1)
 }
+
+UNIVERSITIES_CODES = {
+    '02BD': 'ЧГУ'
+}
+UNIVERSITIES_DECODES = {
+    'ЧГУ': '02BD'
+}
+
+# Поля, по которым фильтруем
+FILTERING_FIELDS = [
+    UNIVERSITY_ID
+]

@@ -1,8 +1,9 @@
-from matplotlib import pyplot
+from matplotlib import pyplot, widgets
 
-from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT
+from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT, FILTER_START_LEFT, FILTER_START_TOP, ALL_LABEL
 from charts.filters import filter_by_datetime_field, filter_by_json_field, filter_by_field
-from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS
+from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS, UNIVERSITY_ID, \
+    UNIVERSITIES_CODES, UNIVERSITY_DATA, FACULTY
 from utils import trim_datetime, fill_by_sequential_values, is_field_type
 
 
@@ -19,9 +20,15 @@ class Chart:
         # Количество пользователей по оси y
         self.__users_amounts = []
         # График
-        self.__ax = pyplot
+        self.pyplot = pyplot
         # Параметры окна
-        self.__ax.figure(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.__figure = self.pyplot.figure(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT))
+        self__ax = self.__figure.subplots()
+        # Фильтры
+        self.filters = {}
+        # self.rax1 = self.__figure.add_subplot([FILTER_START_LEFT, 0.7, 0.05, 0.08])
+        self.university_filter1 = None
+        self.un_w_r = True
 
     @property
     def is_empty(self):
@@ -29,7 +36,7 @@ class Chart:
 
     def get_users_amount(self, times, field_name=REG_TIME, trim=DAY):
         """
-
+        Количество пользователей
         :param times: даты, для которых считаем пользователей
         :param field_name: имя поля, по которому считаем пользователей
         :param trim: момент даты, до который сравниваем
@@ -38,7 +45,7 @@ class Chart:
         users_amounts = []
         if FIELDS_TYPES.get(field_name, None) != DATETIME:
             print("Считать количество пользователей можно только для полей типа datetime")
-            return 0
+            return users_amounts
         # Уникальные значения поля
         for value in times:
             amount = 0
@@ -60,14 +67,16 @@ class Chart:
         values = []
         # Отдельно проверяем значения поля с типом datetime.datetime
         if FIELDS_TYPES.get(field_name, None) == DATETIME:
-            for row in self.__showing_rows:
+            for row in self.__rows:
                 trimmed_date = trim_datetime(getattr(row, field_name, None), trim)
                 if trimmed_date not in values:
                     values.append(trimmed_date)
             values.sort()
-        for row in self.__showing_rows:
+        for row in self.__rows:
             # Необходимо для формирования баттонов на графике
-            pass
+            values.append(getattr(row, field_name, None))
+            values = list(set(values))
+            values.sort()
 
         return values
 
@@ -105,21 +114,49 @@ class Chart:
 
         users_amount = self.get_users_amount(times=self.__times, field_name=REG_TIME, trim=trim)
         self.__users_amounts = users_amount
+        line1 = self.pyplot.plot(self.__times, self.__users_amounts)
+
+    def get_university_labels(self):
+        """Получение значения Radio-button для фильтра university_id"""
+        labels = [ALL_LABEL]
+        university_ids = self.extract_field_unique_values(UNIVERSITY_ID)
+        for university_id in university_ids:
+            labels.append(UNIVERSITIES_CODES.get(university_id))
+        return labels
+
+    def get_faculty_labels(self, university_id):
+        """Получение значения Radio-button для фильтра факультета"""
+        labels = [ALL_LABEL]
+        for row in self.__rows:
+            if getattr(row, UNIVERSITY_ID, university_id) == university_id:
+                label = getattr(row, UNIVERSITY_DATA, None).get(FACULTY, None)
+                labels.append(label) if label else label
+        return labels
+
+    def prepare_filters(self):
+        # rax - фигура, в которой рисуется виджет
+        rax = self.pyplot.axes([FILTER_START_LEFT, FILTER_START_TOP, 0.05, 0.08])
+
+        self.filters[UNIVERSITY_ID] = widgets.RadioButtons(rax, self.get_university_labels(), active=0)
+        self.filters[UNIVERSITY_ID].on_clicked(self.toggle_university_filter)
 
     def show_chart(self):
-        # TODO: числовые параметры фигур задать константами или вычислять автоматически
-        # Вывод графиков
+        """Вывод графиков"""
         self.prepare_data(trim=DAY)
-        line1 = self.__ax.plot(self.__times, self.__users_amounts)
-        # rax - фигура, в которой рисуется виджет
-        # TODO: в фильтре генерировать автоматически
-        # rax = self.__ax.axes([0.1, 0.4, 0.1, 0.15])
-        # check = widgets.CheckButtons(rax, ["asdasd", "asdasd"], )
-        # check2 = widgets.RadioButtons(rax, ['dasdasda', 'asdasdasd'])
-        self.__ax.show()
+        self.prepare_filters()
 
-# TODO: создать class Filter - набор радиобаттонов и чекбаттонов, параметр иницилизации - ax
-# В нём - обработка нажатия кнопки submit
+        self.pyplot.show()
 
-# TODO: trim извлекать с помощью радиобаттонов
-# TODO: подумать над динамическим фильтром
+    def toggle_university_filter(self, label):
+        if label != ALL_LABEL:
+            if self.university_filter1 is None or self.un_w_r:
+                rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.7, 0.05, 0.08])
+                university_labels = self.get_university_labels()
+                self.university_filter1 = widgets.CheckButtons(rax1, ['dsfsd', 'fsdf'])
+                self.un_w_r = False
+        else:
+            self.university_filter1.ax.remove()
+            self.un_w_r = True
+        self.pyplot.show()
+
+        print(label)
