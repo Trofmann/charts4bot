@@ -1,7 +1,6 @@
-# Поля, из которых извлекаем данные
-
 from dateutil.relativedelta import relativedelta
 
+# Поля, из которых извлекаем данные
 ID = 'id'
 UNIVERSITY_ID = 'university_id'
 UNIVERSITY_DATA = 'university_data'
@@ -52,19 +51,6 @@ TIMEDELTAS = {
     HOUR: relativedelta(hours=1),
     MINUTE: relativedelta(minutes=1),
     SECOND: relativedelta(minutes=1)
-}
-
-# Коды университетов и их расшифровки
-UNIVERSITIES_CODES = {
-    '02BD': 'ЧГУ'
-}
-UNIVERSITIES_DECODES = {
-    'ЧГУ': '02BD'
-}
-
-FACULTIES_CODES = {
-    '02BD': {
-    }
 }
 
 # Поля, по которым фильтруем
