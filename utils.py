@@ -66,7 +66,3 @@ def fill_by_sequential_values(start_val, stop_val, step, _datetime=False):
 def is_field_type(field, field_type):
     """Проверка на совпадение типа поля с переданном типом"""
     return FIELDS_TYPES.get(field, None) == field_type
-
-def get_faculty_values(row):
-    """Значение поля faculty"""
-

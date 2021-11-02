@@ -3,7 +3,14 @@ from matplotlib import pyplot, widgets
 from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT, FILTER_START_LEFT, FILTER_START_TOP, ALL_LABEL
 from charts.filters import filter_by_datetime_field, filter_by_json_field, filter_by_field
 from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS, UNIVERSITY_ID, \
-    UNIVERSITIES_CODES, UNIVERSITY_DATA, FACULTY
+    UNIVERSITIES_CODES, UNIVERSITY_DATA, FACULTY, UNIVERSITIES_DECODES
+from utils import trim_datetime, fill_by_sequential_values, is_field_type
+from matplotlib import pyplot, widgets
+
+from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT, FILTER_START_LEFT, FILTER_START_TOP, ALL_LABEL
+from charts.filters import filter_by_datetime_field, filter_by_json_field, filter_by_field
+from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS, UNIVERSITY_ID, \
+    UNIVERSITIES_CODES, UNIVERSITY_DATA, FACULTY, UNIVERSITIES_DECODES
 from utils import trim_datetime, fill_by_sequential_values, is_field_type
 
 
@@ -126,19 +133,26 @@ class Chart:
 
     def get_faculty_labels(self, university_id):
         """Получение значения Radio-button для фильтра факультета"""
-        labels = [ALL_LABEL]
+        labels = []
         for row in self.__rows:
             if getattr(row, UNIVERSITY_ID, university_id) == university_id:
-                label = getattr(row, UNIVERSITY_DATA, None).get(FACULTY, None)
-                labels.append(label) if label else label
-        return labels
+                university_data = getattr(row, UNIVERSITY_DATA, None)
+                if university_data:
+                    label = university_data.get(FACULTY, None)
+                    labels.append(label)
+        return list(set(labels))
 
     def prepare_filters(self):
-        # rax - фигура, в которой рисуется виджет
+        # Фильтр университетов
         rax = self.pyplot.axes([FILTER_START_LEFT, FILTER_START_TOP, 0.05, 0.08])
+        self.filters[UNIVERSITY_ID] = Filter(widgets.RadioButtons(rax, self.get_university_labels(), active=0), False)
+        self.filters[UNIVERSITY_ID].widget.on_clicked(self.toggle_university_filter)
 
-        self.filters[UNIVERSITY_ID] = widgets.RadioButtons(rax, self.get_university_labels(), active=0)
-        self.filters[UNIVERSITY_ID].on_clicked(self.toggle_university_filter)
+        # TODO: автоматическая генерация координат фигуры
+        # Фильтр факультетов
+        rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
+        self.filters[FACULTY] = Filter(widget=widgets.CheckButtons(rax1, []), removed=True)
+        self.filters[FACULTY].widget.ax.remove()
 
     def show_chart(self):
         """Вывод графиков"""
@@ -149,14 +163,21 @@ class Chart:
 
     def toggle_university_filter(self, label):
         if label != ALL_LABEL:
-            if self.university_filter1 is None or self.un_w_r:
-                rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.7, 0.05, 0.08])
-                university_labels = self.get_university_labels()
-                self.university_filter1 = widgets.CheckButtons(rax1, ['dsfsd', 'fsdf'])
-                self.un_w_r = False
+            if self.filters[FACULTY].removed:
+                rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
+                university_id = UNIVERSITIES_DECODES.get(label)
+                faculty_labels = self.get_faculty_labels(university_id)
+                self.filters[FACULTY].widget = widgets.CheckButtons(rax1, faculty_labels)
+                self.filters[FACULTY].removed = False
         else:
-            self.university_filter1.ax.remove()
-            self.un_w_r = True
+            self.filters[FACULTY].widget.ax.remove()
+            self.filters[FACULTY].removed = True
         self.pyplot.show()
 
         print(label)
+
+
+class Filter:
+    def __init__(self, widget: widgets, removed: bool):
+        self.widget = widget
+        self.removed = removed
