@@ -54,11 +54,17 @@ TIMEDELTAS = {
     SECOND: relativedelta(minutes=1)
 }
 
+# Коды университетов и их расшифровки
 UNIVERSITIES_CODES = {
     '02BD': 'ЧГУ'
 }
 UNIVERSITIES_DECODES = {
     'ЧГУ': '02BD'
+}
+
+FACULTIES_CODES = {
+    '02BD': {
+    }
 }
 
 # Поля, по которым фильтруем

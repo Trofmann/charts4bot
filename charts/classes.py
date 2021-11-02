@@ -167,7 +167,8 @@ class Chart:
                 rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
                 university_id = UNIVERSITIES_DECODES.get(label)
                 faculty_labels = self.get_faculty_labels(university_id)
-                self.filters[FACULTY].widget = widgets.CheckButtons(rax1, faculty_labels)
+                self.filters[FACULTY].widget = widgets.CheckButtons(rax1, faculty_labels,
+                                                                    actives=[True] * len(faculty_labels))
                 self.filters[FACULTY].removed = False
         else:
             self.filters[FACULTY].widget.ax.remove()
