@@ -89,3 +89,18 @@ def get_faculty_labels(rows, university_id):
                 label = FACULTIES_CODES.get(university_id).get(faculty_code)
                 labels.append(label)
     return list(set(labels))
+
+
+def code_decode_vales(dict_, rows):
+    """Из человеческих слов в коды или наоборот"""
+    # На случай RadioButton
+    if not isinstance(rows, list):
+        rows = [rows]
+    values_ = []
+    for value in rows:
+        code_ = dict_.get(value, None)
+        if code_:
+            values_.append(code_)
+        else:
+            print(f'Значение {code_} не найдено в словаре')
+    return values_

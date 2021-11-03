@@ -2,9 +2,10 @@ from matplotlib import pyplot
 from matplotlib.widgets import RadioButtons, CheckButtons
 
 from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT, FILTER_START_LEFT, FILTER_START_TOP, ALL_LABEL, \
-    UNIVERSITIES_DECODES, UNIVERSITIES_CODES
+    UNIVERSITIES_DECODES, UNIVERSITIES_CODES, FACULTIES_DECODES
 from charts.filters import filter_by_datetime_field, filter_by_json_field, filter_by_field
-from charts.utils import trim_datetime, fill_by_sequential_values, extract_field_unique_values, get_faculty_labels
+from charts.utils import trim_datetime, fill_by_sequential_values, extract_field_unique_values, get_faculty_labels, \
+    code_decode_vales
 from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS, UNIVERSITY_ID, \
     FACULTY
 from utils import is_field_type
@@ -18,17 +19,20 @@ class Chart:
         self.__rows = rows
         # Данные, которые демонстрируем (Изначально демострируем всё)
         self.__showing_rows = rows
-        # Даты для оси x
+
+        # Даты по оси x
         self.__times = []
         # Количество пользователей по оси y
         self.__users_amounts = []
+
         # График
         self.pyplot = pyplot
-        # Параметры окна
         self.figure, self.ax = self.pyplot.subplots(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT))
         self.figure = (WINDOW_WIDTH, WINDOW_HEIGHT)
         self.chart_line = None
+
         # Фильтры
+        self.filters_inited = False
         self.filters = {}
 
     @property
@@ -84,6 +88,7 @@ class Chart:
 
     def prepare_data(self, trim=DAY):
         """Подготовка данных к выводу"""
+
         times = extract_field_unique_values(self.__rows, field_name=REG_TIME, trim=trim)
         _timedelta = TIMEDELTAS.get(trim, None)
         self.__times = fill_by_sequential_values(times[0], times[-1], _timedelta, _datetime=True)
@@ -98,7 +103,7 @@ class Chart:
             self.chart_line.set_ydata(self.__users_amounts)
         self.pyplot.draw()
 
-    def prepare_filters(self):
+    def init_filters(self):
         """Подготовка фильров"""
         # Фильтр университетов
         rax = self.pyplot.axes([FILTER_START_LEFT, FILTER_START_TOP, 0.05, 0.08])
@@ -110,6 +115,8 @@ class Chart:
         self.filters[FACULTY] = Filter(widget=CheckButtons(rax1, []), removed=True)
         self.filters[FACULTY].widget.ax.remove()
 
+        self.filters_inited = True
+
     def get_university_labels(self):
         """Получение значения Radio-button для фильтра university_id"""
         labels = [ALL_LABEL]
@@ -117,6 +124,30 @@ class Chart:
         for university_id in university_ids:
             labels.append(UNIVERSITIES_CODES.get(university_id))
         return labels
+
+    def get_filters_values(self, label):
+        """Получение выбранных значений фильтров"""
+        sorting_values = {}
+        for field_name, filter_ in self.filters.items():
+            filter_chosen_values = filter_.get_chosen()
+            # filter_chosen_values == None, если фильтр скрыт
+            if filter_chosen_values is not None and filter_chosen_values != ALL_LABEL:
+                # Переводим из человеческих слов в коды
+                if field_name == UNIVERSITY_ID:
+                    filter_chosen_values = code_decode_vales(UNIVERSITIES_DECODES, filter_chosen_values)
+
+                elif field_name == FACULTY:
+                    university_id = code_decode_vales(UNIVERSITIES_DECODES, self.filters[UNIVERSITY_ID].get_chosen())[0]
+                    filter_chosen_values = code_decode_vales(FACULTIES_DECODES[university_id], filter_chosen_values)
+                    sorting_values.update({
+                        field_name: filter_chosen_values
+                    })
+
+            sorting_values.update({
+                field_name: filter_chosen_values
+            })
+        print(f'Фильтры: {sorting_values}')
+        return sorting_values
 
     def toggle_university_filter(self, label):
         """Обработка нажатия на фильтр университетов"""
@@ -141,8 +172,10 @@ class Chart:
 
     def show_chart(self):
         """Вывод графиков"""
+        # Чтобы можно было использовать функцию при нажатии на фильтр
+        if not self.filters_inited:
+            self.init_filters()
         self.prepare_data(trim=DAY)
-        self.prepare_filters()
 
         self.pyplot.show()
 
@@ -161,10 +194,10 @@ class Filter:
         """
         if not self.removed:
             if isinstance(self.widget, RadioButtons):
-                return [self.widget.value_selected]
+                return self.widget.value_selected
             elif isinstance(self.widget, CheckButtons):
                 statuses = self.widget.get_status()
                 labels = self.widget.labels
-                return [label for label, status in zip(labels, statuses) if status]
+                return [label._text for label, status in zip(labels, statuses) if status]
             else:
                 print('Обрабатываются только RadioButtons, CheckButtons')
