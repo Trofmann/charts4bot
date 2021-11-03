@@ -1,4 +1,5 @@
-from matplotlib import pyplot, widgets
+from matplotlib import pyplot
+from matplotlib.widgets import RadioButtons, CheckButtons
 
 from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT, FILTER_START_LEFT, FILTER_START_TOP, ALL_LABEL, \
     UNIVERSITIES_DECODES, UNIVERSITIES_CODES
@@ -101,12 +102,12 @@ class Chart:
         """Подготовка фильров"""
         # Фильтр университетов
         rax = self.pyplot.axes([FILTER_START_LEFT, FILTER_START_TOP, 0.05, 0.08])
-        self.filters[UNIVERSITY_ID] = Filter(widgets.RadioButtons(rax, self.get_university_labels(), active=0), False)
+        self.filters[UNIVERSITY_ID] = Filter(RadioButtons(rax, self.get_university_labels(), active=0), False)
         self.filters[UNIVERSITY_ID].widget.on_clicked(self.toggle_university_filter)
 
         # Фильтр факультетов
         rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
-        self.filters[FACULTY] = Filter(widget=widgets.CheckButtons(rax1, []), removed=True)
+        self.filters[FACULTY] = Filter(widget=CheckButtons(rax1, []), removed=True)
         self.filters[FACULTY].widget.ax.remove()
 
     def get_university_labels(self):
@@ -124,8 +125,9 @@ class Chart:
                 rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
                 university_id = UNIVERSITIES_DECODES.get(label)
                 faculty_labels = get_faculty_labels(self.__rows, university_id)
-                self.filters[FACULTY].widget = widgets.CheckButtons(rax1, faculty_labels,
-                                                                    actives=[True] * len(faculty_labels))
+                faculty_labels.sort()
+                self.filters[FACULTY].widget = CheckButtons(rax1, faculty_labels,
+                                                            actives=[True] * len(faculty_labels))
                 self.filters[FACULTY].removed = False
         # Если выбрано значение "Все", скрываем фильтр факультетов
         elif not self.filters[FACULTY].removed:
@@ -146,6 +148,23 @@ class Chart:
 
 
 class Filter:
-    def __init__(self, widget: widgets, removed: bool):
+    """Фильтр"""
+
+    def __init__(self, widget, removed: bool):
         self.widget = widget
         self.removed = removed
+
+    def get_chosen(self):
+        """
+        Получение выбранных значений фильтра
+        :return: list
+        """
+        if not self.removed:
+            if isinstance(self.widget, RadioButtons):
+                return [self.widget.value_selected]
+            elif isinstance(self.widget, CheckButtons):
+                statuses = self.widget.get_status()
+                labels = self.widget.labels
+                return [label for label, status in zip(labels, statuses) if status]
+            else:
+                print('Обрабатываются только RadioButtons, CheckButtons')
