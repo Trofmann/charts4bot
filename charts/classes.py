@@ -24,7 +24,9 @@ class Chart:
         # График
         self.pyplot = pyplot
         # Параметры окна
-        self.__figure = self.pyplot.figure(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.figure, self.ax = self.pyplot.subplots(figsize=(WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.figure = (WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.chart_line = None
         # Фильтры
         self.filters = {}
 
@@ -87,7 +89,25 @@ class Chart:
 
         users_amount = self.get_users_amount(times=self.__times, field_name=REG_TIME, trim=trim)
         self.__users_amounts = users_amount
-        line1 = self.pyplot.plot(self.__times, self.__users_amounts)
+
+        if self.chart_line is None:
+            self.chart_line, = self.ax.plot(self.__times, self.__users_amounts)
+        else:
+            self.chart_line.set_xdata(self.__times)
+            self.chart_line.set_ydata(self.__users_amounts)
+        self.pyplot.draw()
+
+    def prepare_filters(self):
+        """Подготовка фильров"""
+        # Фильтр университетов
+        rax = self.pyplot.axes([FILTER_START_LEFT, FILTER_START_TOP, 0.05, 0.08])
+        self.filters[UNIVERSITY_ID] = Filter(widgets.RadioButtons(rax, self.get_university_labels(), active=0), False)
+        self.filters[UNIVERSITY_ID].widget.on_clicked(self.toggle_university_filter)
+
+        # Фильтр факультетов
+        rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
+        self.filters[FACULTY] = Filter(widget=widgets.CheckButtons(rax1, []), removed=True)
+        self.filters[FACULTY].widget.ax.remove()
 
     def get_university_labels(self):
         """Получение значения Radio-button для фильтра university_id"""
@@ -97,26 +117,8 @@ class Chart:
             labels.append(UNIVERSITIES_CODES.get(university_id))
         return labels
 
-    def prepare_filters(self):
-        # Фильтр университетов
-        rax = self.pyplot.axes([FILTER_START_LEFT, FILTER_START_TOP, 0.05, 0.08])
-        self.filters[UNIVERSITY_ID] = Filter(widgets.RadioButtons(rax, self.get_university_labels(), active=0), False)
-        self.filters[UNIVERSITY_ID].widget.on_clicked(self.toggle_university_filter)
-
-        # TODO: автоматическая генерация координат фигуры
-        # Фильтр факультетов
-        rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
-        self.filters[FACULTY] = Filter(widget=widgets.CheckButtons(rax1, []), removed=True)
-        self.filters[FACULTY].widget.ax.remove()
-
-    def show_chart(self):
-        """Вывод графиков"""
-        self.prepare_data(trim=DAY)
-        self.prepare_filters()
-
-        self.pyplot.show()
-
     def toggle_university_filter(self, label):
+        """Обработка нажатия на фильтр университетов"""
         if label != ALL_LABEL:
             if self.filters[FACULTY].removed:
                 rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
@@ -125,9 +127,21 @@ class Chart:
                 self.filters[FACULTY].widget = widgets.CheckButtons(rax1, faculty_labels,
                                                                     actives=[True] * len(faculty_labels))
                 self.filters[FACULTY].removed = False
+        # Если выбрано значение "Все", скрываем фильтр факультетов
         elif not self.filters[FACULTY].removed:
             self.filters[FACULTY].widget.ax.remove()
             self.filters[FACULTY].removed = True
+            # ПРИМЕР ИЗМЕНЕНИЯ
+            # self.chart_line.set_xdata(self.__times[1:9])
+            # self.chart_line.set_ydata(self.__users_amounts[1:9])
+
+        self.pyplot.show()
+
+    def show_chart(self):
+        """Вывод графиков"""
+        self.prepare_data(trim=DAY)
+        self.prepare_filters()
+
         self.pyplot.show()
 
 

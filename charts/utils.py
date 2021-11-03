@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from charts.const import FACULTIES_CODES
 from const import YEAR, DAY, MONTH, HOUR, MINUTE, SECOND, FIELDS_TYPES, DATETIME, JSON, UNIVERSITY_ID, UNIVERSITY_DATA, \
     FACULTY
 
@@ -84,6 +85,7 @@ def get_faculty_labels(rows, university_id):
         if getattr(row, UNIVERSITY_ID, university_id) == university_id:
             university_data = getattr(row, UNIVERSITY_DATA, None)
             if university_data:
-                label = university_data.get(FACULTY, None)
+                faculty_code = university_data.get(FACULTY, None)
+                label = FACULTIES_CODES.get(university_id).get(faculty_code)
                 labels.append(label)
     return list(set(labels))
