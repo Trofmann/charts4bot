@@ -35,10 +35,6 @@ class Chart:
         self.filters_inited = False
         self.filters = {}
 
-    @property
-    def is_empty(self):
-        return bool(len(self.__rows))
-
     def get_users_amount(self, times, field_name=REG_TIME, trim=DAY):
         """
         Количество пользователей
