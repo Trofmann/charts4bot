@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from charts.const import FACULTIES_DECODES
-from const import YEAR, DAY, MONTH, HOUR, MINUTE, SECOND, FIELDS_TYPES, DATETIME, JSON, TABLE_EXTRA_FIELDS, RED_COLOR
+from charts.const import FACULTIES_DECODES, ALL_LABEL, UNIVERSITIES_CODES
+from const import YEAR, DAY, MONTH, HOUR, MINUTE, SECOND, FIELDS_TYPES, DATETIME, JSON, TABLE_EXTRA_FIELDS, RED_COLOR, \
+    UNIVERSITY_ID
 
 
 def trim_datetime(_datetime, trim=DAY):
@@ -103,3 +104,12 @@ def get_extra_field_parent_field(field):
     if parent_field:
         return parent_field
     print(f'{RED_COLOR}Поля {field} не является полей json-поля')
+
+
+def get_university_filter_labels(rows):
+    """Получение значений меток Radio-button для фильтра university_id"""
+    labels = [ALL_LABEL]
+    university_ids = extract_field_unique_values(rows, UNIVERSITY_ID)
+    for university_id in university_ids:
+        labels.append(UNIVERSITIES_CODES.get(university_id))
+    return labels

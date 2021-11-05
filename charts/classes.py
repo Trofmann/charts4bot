@@ -2,10 +2,10 @@ from matplotlib import pyplot
 from matplotlib.widgets import RadioButtons, CheckButtons
 
 from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT, FILTER_START_LEFT, FILTER_START_TOP, ALL_LABEL, \
-    UNIVERSITIES_DECODES, UNIVERSITIES_CODES, FACULTIES_DECODES
+    UNIVERSITIES_DECODES, FACULTIES_DECODES
 from charts.filters import filter_by_datetime_field, filter_by_json_field, filter_by_field
 from charts.utils import trim_datetime, fill_by_sequential_values, extract_field_unique_values, get_faculty_labels, \
-    code_decode_vales, get_extra_field_parent_field
+    code_decode_vales, get_extra_field_parent_field, get_university_filter_labels
 from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS, UNIVERSITY_ID, \
     FACULTY, TABLE_EXTRA_FIELDS, RED_COLOR
 from utils import is_field_type
@@ -76,7 +76,7 @@ class Chart:
                 if is_field_type(field, DATETIME):
                     filtered_values = filter_by_datetime_field(filtered_values, field, values)
                 elif is_field_type(field, JSON):
-                    filtered_values = filter_by_json_field(filtered_values, field, values)
+                    print(f'{RED_COLOR}Нельзя фильтровать по json-полю. Укажите одно из дочерних полей json-поля')
                 else:
                     filtered_values = filter_by_field(filtered_values, field, values)
 
@@ -89,15 +89,16 @@ class Chart:
     def prepare_data(self, trim=DAY):
         """Подготовка данных к выводу"""
 
+        # Фильтруем данные
         filters_values = self.get_filters_values()
         self.__showing_rows = self.filter_by_fields_values(filters_values)
 
+        # Подготовка времени
         times = extract_field_unique_values(self.__showing_rows, field_name=REG_TIME, trim=trim)
         _timedelta = TIMEDELTAS.get(trim, None)
         self.__times = fill_by_sequential_values(times[0], times[-1], _timedelta, _datetime=True) if times else []
 
-        users_amount = self.get_users_amount(times=self.__times, field_name=REG_TIME, trim=trim)
-        self.__users_amounts = users_amount
+        self.__users_amounts = self.get_users_amount(times=self.__times, field_name=REG_TIME, trim=trim)
 
         if self.chart_line is None:
             self.chart_line, = self.ax.plot(self.__times, self.__users_amounts)
@@ -110,7 +111,8 @@ class Chart:
         """Подготовка фильров"""
         # Фильтр университетов
         rax = self.pyplot.axes([FILTER_START_LEFT, FILTER_START_TOP, 0.05, 0.08])
-        self.filters[UNIVERSITY_ID] = Filter(RadioButtons(rax, self.get_university_labels(), active=0), False)
+        self.filters[UNIVERSITY_ID] = Filter(RadioButtons(rax, get_university_filter_labels(self.__rows), active=0),
+                                             removed=False)
         self.filters[UNIVERSITY_ID].widget.on_clicked(self.toggle_university_filter)
 
         # Фильтр факультетов
@@ -119,14 +121,6 @@ class Chart:
         self.filters[FACULTY].widget.ax.remove()
 
         self.filters_inited = True
-
-    def get_university_labels(self):
-        """Получение значения Radio-button для фильтра university_id"""
-        labels = [ALL_LABEL]
-        university_ids = extract_field_unique_values(self.__rows, UNIVERSITY_ID)
-        for university_id in university_ids:
-            labels.append(UNIVERSITIES_CODES.get(university_id))
-        return labels
 
     def get_filters_values(self, *args):
         """Получение выбранных значений фильтров"""
