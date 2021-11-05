@@ -7,7 +7,7 @@ from charts.filters import filter_by_datetime_field, filter_by_json_field, filte
 from charts.utils import trim_datetime, fill_by_sequential_values, extract_field_unique_values, get_faculty_labels, \
     code_decode_vales
 from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS, UNIVERSITY_ID, \
-    FACULTY
+    FACULTY, TABLE_EXTRA_FIELDS
 from utils import is_field_type
 
 
@@ -49,7 +49,7 @@ class Chart:
         """
         users_amounts = []
         if FIELDS_TYPES.get(field_name, None) != DATETIME:
-            print("Считать количество пользователей можно только для полей типа datetime")
+            print("\033[31m Считать количество пользователей можно только для полей типа datetime")
             return users_amounts
         for value in times:
             amount = 0
@@ -60,36 +60,43 @@ class Chart:
 
         return users_amounts
 
-    def filter_by_fields_values(self, values=None, **kwargs):
+    def filter_by_fields_values(self, filters_values):
         """
         Фильтрация данных по значениям поля
-        :param values: значения
-        :param kwargs: словарь вида {имя_поля : [значения]}
+        :param filters_values: словарь вида {имя_поля : [значения]}
         :return: filtered_values: список отфильтрованных значений
         """
 
         filtered_values = self.__rows
-        for field, values in kwargs.items():
-            if field not in TABLE_FIELDS:
-                print(f'Поле {field} не извлекалось из БД')
-                continue
+        for field, values in filters_values.items():
             if not isinstance(values, list):
                 values = [values]
-                print(f'Для поля {field} передан не список значений: ({values})')
+                print(f'\033[31mДля поля {field} передан не список значений: ({values})')
+            if field not in TABLE_FIELDS and field not in TABLE_EXTRA_FIELDS:
+                print(f'\033[31mПоле {field} не извлекалось из БД')
+                continue
 
-            if is_field_type(field, DATETIME):
-                filtered_values = filter_by_datetime_field(filtered_values, field, values)
-            elif is_field_type(field, JSON):
-                filtered_values = filter_by_json_field(filtered_values, field, values)
+            elif field in TABLE_FIELDS:
+                if is_field_type(field, DATETIME):
+                    filtered_values = filter_by_datetime_field(filtered_values, field, values)
+                elif is_field_type(field, JSON):
+                    filtered_values = filter_by_json_field(filtered_values, field, values)
+                else:
+                    filtered_values = filter_by_field(filtered_values, field, values)
+
             else:
-                filtered_values = filter_by_field(filtered_values, field, values)
+                # TODO: сделать фильтрацию по полям-потомкам json-полей
+                pass
 
         return filtered_values
 
     def prepare_data(self, trim=DAY):
         """Подготовка данных к выводу"""
 
-        times = extract_field_unique_values(self.__rows, field_name=REG_TIME, trim=trim)
+        filters_values = self.get_filters_values()
+        self.__showing_rows = self.filter_by_fields_values(filters_values)
+
+        times = extract_field_unique_values(self.__showing_rows, field_name=REG_TIME, trim=trim)
         _timedelta = TIMEDELTAS.get(trim, None)
         self.__times = fill_by_sequential_values(times[0], times[-1], _timedelta, _datetime=True)
 
@@ -125,7 +132,7 @@ class Chart:
             labels.append(UNIVERSITIES_CODES.get(university_id))
         return labels
 
-    def get_filters_values(self, label):
+    def get_filters_values(self, *args):
         """Получение выбранных значений фильтров"""
         sorting_values = {}
         for field_name, filter_ in self.filters.items():
@@ -139,14 +146,11 @@ class Chart:
                 elif field_name == FACULTY:
                     university_id = code_decode_vales(UNIVERSITIES_DECODES, self.filters[UNIVERSITY_ID].get_chosen())[0]
                     filter_chosen_values = code_decode_vales(FACULTIES_DECODES[university_id], filter_chosen_values)
-                    sorting_values.update({
-                        field_name: filter_chosen_values
-                    })
 
-            sorting_values.update({
-                field_name: filter_chosen_values
-            })
-        print(f'Фильтры: {sorting_values}')
+                sorting_values.update({
+                    field_name: filter_chosen_values
+                })
+        print(f' Фильтры: {sorting_values}')
         return sorting_values
 
     def toggle_university_filter(self, label):
@@ -168,13 +172,14 @@ class Chart:
             # self.chart_line.set_xdata(self.__times[1:9])
             # self.chart_line.set_ydata(self.__users_amounts[1:9])
 
-        self.pyplot.show()
+        self.show_chart()
 
     def show_chart(self):
         """Вывод графиков"""
         # Чтобы можно было использовать функцию при нажатии на фильтр
         if not self.filters_inited:
             self.init_filters()
+
         self.prepare_data(trim=DAY)
 
         self.pyplot.show()
@@ -200,4 +205,4 @@ class Filter:
                 labels = self.widget.labels
                 return [label._text for label, status in zip(labels, statuses) if status]
             else:
-                print('Обрабатываются только RadioButtons, CheckButtons')
+                print('\033[31mОбрабатываются только RadioButtons, CheckButtons')

@@ -7,24 +7,31 @@ UNIVERSITY_DATA = 'university_data'
 REG_TIME = 'reg_time'
 FACULTY = 'faculty'
 
+# Извлекаемые поля
 TABLE_FIELDS = [
     ID,
     UNIVERSITY_ID,
     UNIVERSITY_DATA,
-    REG_TIME
+    REG_TIME,
 ]
+
+# Поля, которые есть в извлекаемых parent-json-полях (field: parent)
+TABLE_EXTRA_FIELDS = {
+    FACULTY: UNIVERSITY_DATA
+}
 
 # Типы извлекаемых полей
 INTEGER = 'integer'
-CHAR = 'field'
+CHAR = 'char_field'
 JSON = 'json'
 DATETIME = 'timestamp'
 
 FIELDS_TYPES = {
-    'id': INTEGER,
-    'university_id': CHAR,
-    'university_data': JSON,
-    'reg_time': DATETIME,
+    ID: INTEGER,
+    UNIVERSITY_ID: CHAR,
+    UNIVERSITY_DATA: JSON,
+    REG_TIME: DATETIME,
+    FACULTY: CHAR
 }
 
 # Моменты, до которых берем дату
