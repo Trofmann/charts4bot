@@ -1,5 +1,7 @@
 from dateutil.relativedelta import relativedelta
 
+RED_COLOR = '\033[31m'
+
 # Поля, из которых извлекаем данные
 ID = 'id'
 UNIVERSITY_ID = 'university_id'

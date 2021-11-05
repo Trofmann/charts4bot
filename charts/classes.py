@@ -5,9 +5,9 @@ from charts.const import WINDOW_WIDTH, WINDOW_HEIGHT, FILTER_START_LEFT, FILTER_
     UNIVERSITIES_DECODES, UNIVERSITIES_CODES, FACULTIES_DECODES
 from charts.filters import filter_by_datetime_field, filter_by_json_field, filter_by_field
 from charts.utils import trim_datetime, fill_by_sequential_values, extract_field_unique_values, get_faculty_labels, \
-    code_decode_vales
+    code_decode_vales, get_extra_field_parent_field
 from const import TABLE_FIELDS, FIELDS_TYPES, DATETIME, JSON, DAY, REG_TIME, TIMEDELTAS, UNIVERSITY_ID, \
-    FACULTY, TABLE_EXTRA_FIELDS
+    FACULTY, TABLE_EXTRA_FIELDS, RED_COLOR
 from utils import is_field_type
 
 
@@ -71,9 +71,9 @@ class Chart:
         for field, values in filters_values.items():
             if not isinstance(values, list):
                 values = [values]
-                print(f'\033[31mДля поля {field} передан не список значений: ({values})')
+                print(f'{RED_COLOR}Для поля {field} передан не список значений: ({values})')
             if field not in TABLE_FIELDS and field not in TABLE_EXTRA_FIELDS:
-                print(f'\033[31mПоле {field} не извлекалось из БД')
+                print(f'{RED_COLOR}Поле {field} не извлекалось из БД')
                 continue
 
             elif field in TABLE_FIELDS:
@@ -85,8 +85,8 @@ class Chart:
                     filtered_values = filter_by_field(filtered_values, field, values)
 
             else:
-                # TODO: сделать фильтрацию по полям-потомкам json-полей
-                pass
+                parent_field = get_extra_field_parent_field(field)
+                filtered_values = filter_by_json_field(filtered_values, field, parent_field, values)
 
         return filtered_values
 
@@ -98,7 +98,7 @@ class Chart:
 
         times = extract_field_unique_values(self.__showing_rows, field_name=REG_TIME, trim=trim)
         _timedelta = TIMEDELTAS.get(trim, None)
-        self.__times = fill_by_sequential_values(times[0], times[-1], _timedelta, _datetime=True)
+        self.__times = fill_by_sequential_values(times[0], times[-1], _timedelta, _datetime=True) if times else []
 
         users_amount = self.get_users_amount(times=self.__times, field_name=REG_TIME, trim=trim)
         self.__users_amounts = users_amount
@@ -156,25 +156,24 @@ class Chart:
     def toggle_university_filter(self, label):
         """Обработка нажатия на фильтр университетов"""
         if label != ALL_LABEL:
+            # TODO: нужен рефакторинг. Возможно, через метод __init__ Filter
             if self.filters[FACULTY].removed:
                 rax1 = self.pyplot.axes([FILTER_START_LEFT, 0.2, 0.1, 0.3])
                 university_id = UNIVERSITIES_DECODES.get(label)
-                faculty_labels = get_faculty_labels(self.__rows, university_id)
+                faculty_labels = get_faculty_labels(university_id)
                 faculty_labels.sort()
                 self.filters[FACULTY].widget = CheckButtons(rax1, faculty_labels,
                                                             actives=[True] * len(faculty_labels))
                 self.filters[FACULTY].removed = False
+                self.filters[FACULTY].widget.on_clicked(self.show_chart)
         # Если выбрано значение "Все", скрываем фильтр факультетов
         elif not self.filters[FACULTY].removed:
             self.filters[FACULTY].widget.ax.remove()
             self.filters[FACULTY].removed = True
-            # ПРИМЕР ИЗМЕНЕНИЯ
-            # self.chart_line.set_xdata(self.__times[1:9])
-            # self.chart_line.set_ydata(self.__users_amounts[1:9])
 
         self.show_chart()
 
-    def show_chart(self):
+    def show_chart(self, label=None):
         """Вывод графиков"""
         # Чтобы можно было использовать функцию при нажатии на фильтр
         if not self.filters_inited:

@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from charts.const import FACULTIES_CODES
-from const import YEAR, DAY, MONTH, HOUR, MINUTE, SECOND, FIELDS_TYPES, DATETIME, JSON, UNIVERSITY_ID, UNIVERSITY_DATA, \
-    FACULTY
+from charts.const import FACULTIES_DECODES
+from const import YEAR, DAY, MONTH, HOUR, MINUTE, SECOND, FIELDS_TYPES, DATETIME, JSON, TABLE_EXTRA_FIELDS, RED_COLOR
 
 
 def trim_datetime(_datetime, trim=DAY):
@@ -78,17 +77,9 @@ def extract_field_unique_values(rows, field_name: str, trim=DAY):
     return values
 
 
-def get_faculty_labels(rows, university_id):
+def get_faculty_labels(university_id):
     """Получение значения Radio-button для фильтра факультета"""
-    labels = []
-    for row in rows:
-        if getattr(row, UNIVERSITY_ID, university_id) == university_id:
-            university_data = getattr(row, UNIVERSITY_DATA, None)
-            if university_data:
-                faculty_code = university_data.get(FACULTY, None)
-                label = FACULTIES_CODES.get(university_id).get(faculty_code)
-                labels.append(label)
-    return list(set(labels))
+    return [label for label in FACULTIES_DECODES.get(university_id)]
 
 
 def code_decode_vales(dict_, rows):
@@ -104,3 +95,11 @@ def code_decode_vales(dict_, rows):
         else:
             print(f'Значение {code_} не найдено в словаре')
     return values_
+
+
+def get_extra_field_parent_field(field):
+    """Получение родительского json-поля"""
+    parent_field = TABLE_EXTRA_FIELDS.get(field, None)
+    if parent_field:
+        return parent_field
+    print(f'{RED_COLOR}Поля {field} не является полей json-поля')
