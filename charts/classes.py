@@ -76,7 +76,7 @@ class Chart:
                 if is_field_type(field, DATETIME):
                     filtered_values = filter_by_datetime_field(filtered_values, field, values)
                 elif is_field_type(field, JSON):
-                    filtered_values = filter_by_json_field(filtered_values, field, values)
+                    print(f'{RED_COLOR}Нельзя фильтровать по json-полю. Укажите одно из дочерних полей json-поля')
                 else:
                     filtered_values = filter_by_field(filtered_values, field, values)
 
@@ -89,15 +89,16 @@ class Chart:
     def prepare_data(self, trim=DAY):
         """Подготовка данных к выводу"""
 
+        # Фильтруем данные
         filters_values = self.get_filters_values()
         self.__showing_rows = self.filter_by_fields_values(filters_values)
 
+        # Подготовка времени
         times = extract_field_unique_values(self.__showing_rows, field_name=REG_TIME, trim=trim)
         _timedelta = TIMEDELTAS.get(trim, None)
         self.__times = fill_by_sequential_values(times[0], times[-1], _timedelta, _datetime=True) if times else []
 
-        users_amount = self.get_users_amount(times=self.__times, field_name=REG_TIME, trim=trim)
-        self.__users_amounts = users_amount
+        self.__users_amounts = self.get_users_amount(times=self.__times, field_name=REG_TIME, trim=trim)
 
         if self.chart_line is None:
             self.chart_line, = self.ax.plot(self.__times, self.__users_amounts)
@@ -120,7 +121,6 @@ class Chart:
         self.filters[FACULTY].widget.ax.remove()
 
         self.filters_inited = True
-
 
     def get_filters_values(self, *args):
         """Получение выбранных значений фильтров"""
