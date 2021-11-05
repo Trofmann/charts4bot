@@ -176,7 +176,7 @@ class Chart:
             self.init_filters()
 
         self.prepare_data(trim=DAY)
-        print(1)
+
         self.pyplot.show()
 
 
