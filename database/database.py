@@ -1,9 +1,10 @@
+import os
 from collections import namedtuple
 
 import psycopg2
 
 from const import TABLE_FIELDS
-from settings import local, TABLE_NAME, DB_URL
+from settings import local, TABLE_NAME, DB_URL, connect_by_url
 
 DbData = namedtuple('Data', TABLE_FIELDS)
 
@@ -32,7 +33,10 @@ class Database:
         try:
             if local:
                 connection_data = self._get_connection_data()
-                self.__connection = psycopg2.connect(**connection_data)
+                if connect_by_url:
+                    self.__connection = psycopg2.connect(os.environ['DATABASE_URI'])
+                else:
+                    self.__connection = psycopg2.connect(**connection_data)
             else:
                 self.__connection = psycopg2.connect(DB_URL)
             print('Database base was opened successfully')

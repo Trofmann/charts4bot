@@ -10,3 +10,4 @@ TABLE_NAME = 'TCUserData'
 
 local = True
 test = False
+connect_by_url = False
